@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deezer-Manager - Registro</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <style type="text/tailwindcss">
+    @variant dark (&:where(.dark, .dark *));
+  </style>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 font-sans min-h-screen flex flex-col justify-between p-6 transition-colors duration-300">
+
+  <header class="w-full flex justify-end max-w-5xl mx-auto">
+    <button id="themeToggle" class="bg-white dark:bg-[#1f293d] hover:scale-105 text-xs text-slate-800 dark:text-purple-300 font-bold px-4 py-2 rounded-full transition-all duration-300 shadow-sm flex items-center gap-2 cursor-pointer border border-slate-200 dark:border-transparent">
+      <i id="themeIcon" class="fa-solid fa-moon text-purple-600 dark:text-[#8b5cf6]"></i> 
+      <span id="themeText">Modo Oscuro</span>
+    </button>
+  </header>
+
+  <main class="flex-1 flex items-center justify-center my-4">
+    <div class="w-full max-w-md bg-white dark:bg-[#121826] rounded-xl p-8 shadow-md border border-slate-200 dark:border-transparent transition-colors duration-300">
+      
+      <div class="flex flex-col items-center mb-6 text-center">
+        <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-500 dark:from-[#8b5cf6] dark:to-[#ec4899] rounded-lg flex items-center justify-center shadow-md mb-3">
+          <i class="fa-solid fa-layer-group text-white text-xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Crear cuenta</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Únete para disfrutar de la buena música</p>
+      </div>
+
+      <form action="login.html" class="space-y-4">
+        
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Nombre de usuario</label>
+          <div class="relative">
+            <i class="fa-solid fa-user absolute left-4 top-3.5 text-slate-400"></i>
+            <input type="text" required placeholder="Ej: lorena_martinez" 
+                   class="w-full bg-slate-100 dark:bg-[#1f293d] text-slate-900 dark:text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 dark:focus:ring-[#8b5cf6] placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-300 border border-slate-200 dark:border-transparent">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Correo electrónico</label>
+          <div class="relative">
+            <i class="fa-solid fa-envelope absolute left-4 top-3.5 text-slate-400"></i>
+            <input type="email" required placeholder="tu@correo.com" 
+                   class="w-full bg-slate-100 dark:bg-[#1f293d] text-slate-900 dark:text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 dark:focus:ring-[#8b5cf6] placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-300 border border-slate-200 dark:border-transparent">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Contraseña</label>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400"></i>
+            <input type="password" required placeholder="Mínimo 8 caracteres" 
+                   class="w-full bg-slate-100 dark:bg-[#1f293d] text-slate-900 dark:text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 dark:focus:ring-[#8b5cf6] placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-300 border border-slate-200 dark:border-transparent">
+          </div>
+        </div>
+
+        <div class="flex items-start pt-1">
+          <input id="terms" type="checkbox" required class="w-4 h-4 mt-0.5 rounded text-purple-600 focus:ring-purple-500 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-[#1f293d]">
+          <label for="terms" class="ml-2 text-xs text-slate-500 dark:text-slate-400 cursor-pointer select-none">
+            Acepto los <a href="#" class="text-purple-600 dark:text-[#8b5cf6] hover:underline">Términos de servicio</a>.
+          </label>
+        </div>
+
+        <button type="submit" 
+                class="w-full bg-slate-900 dark:bg-white text-white dark:text-black font-bold py-3 px-4 rounded-xl text-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-md cursor-pointer mt-2">
+          Registrarse
+        </button>
+      </form>
+
+      <p class="text-center text-xs text-slate-500 dark:text-slate-400 mt-6">
+        ¿Ya tienes una cuenta? 
+        <a href="login.html" class="text-purple-600 dark:text-[#8b5cf6] font-bold hover:underline">Inicia sesión aquí</a>
+      </p>
+
+    </div>
+  </main>
+
+  <footer class="w-full text-center text-xs text-slate-400 dark:text-slate-600 hidden sm:block">
+    &copy; 2026 Deezer-Manager. Todos los derechos reservados.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
