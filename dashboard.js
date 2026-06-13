@@ -70,37 +70,31 @@ function obtenerCancionesMejorRankeadas() {
 
 // Función de ejemplo para renderizar las tarjetas en tu HTML
 function mostrarCancionesEnPantalla(listaCanciones) {
-  // Nota: Si usas las tarjetas de tu index.html, podrías ordenarlas explícitamente 
-  // por las dudas usando .sort((a, b) => b.rank - a.rank), aunque la API de chart ya viene ordenada.
   const listaContenedor = document.getElementById('contenedor-canciones');
+  const htmlTarjetas = listaCanciones.map(cancion => {
+    return `
+      <div class="music-card bg-slate-50 dark:bg-[#1a2333] p-4 rounded-md hover:bg-slate-100 dark:hover:bg-[#243147] transition-colors duration-200 group relative cursor-pointer border border-slate-200 dark:border-transparent" 
+           data-title="${cancion.title}" data-artist="${cancion.artist.name}">
+        <div class="relative mb-3 aspect-square w-full">
+          <img src="${cancion.album.cover}" class="rounded w-full h-full object-cover shadow-md" alt="Cover de ${cancion.title}">
+          <button class="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-purple-600 dark:bg-[#8b5cf6] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200 shadow-lg">
+            <i class="fa-solid fa-play"></i>
+          </button>
+        </div>
+        <h3 class="text-sm font-bold truncate mb-1 text-slate-900 dark:text-white">${cancion.title}</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 truncate">${cancion.artist.name}</p>
+        <div class="star-rating flex text-sm text-slate-300 dark:text-slate-600 gap-0.5">
+          <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="1"></i>
+          <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="2"></i>
+          <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="3"></i>
+          <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="4"></i>
+          <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="5"></i>
+        </div>
+      </div>
+    `;
+  }).join(''); 
 
-// 2. Creamos el HTML mapeando el array
-
-// 3. Inyectamos todo el bloque de golpe
-listaContenedor.innerHTML = htmlElementos;
-  listaCanciones.forEach(cancion => {
-    console.log(`Título: ${cancion.title} | Artista: ${cancion.artist.name} | Rank: ${cancion.rank}`);
-    return `<div class="music-card bg-slate-50 dark:bg-[#1a2333] p-4 rounded-md hover:bg-slate-100 dark:hover:bg-[#243147] transition-colors duration-200 group relative cursor-pointer border border-slate-200 dark:border-transparent" 
-               data-title="${cancion.title}" data-artist="${cancion.artist.name}">
-            <div class="relative mb-3 aspect-square w-full">
-              <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&q=80" class="rounded w-full h-full object-cover shadow-md" alt="Cover">
-              <button class="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-purple-600 dark:bg-[#8b5cf6] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200 shadow-lg">
-                <i class="fa-solid fa-play"></i>
-              </button>
-            </div>
-            <h3 class="text-sm font-bold truncate mb-1 text-slate-900 dark:text-white">Novio No</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 truncate">Sech, Ryan Castro</p>
-            
-            <div class="star-rating flex text-sm text-slate-300 dark:text-slate-600 gap-0.5">
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="1"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="2"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="3"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="4"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="5"></i>
-            </div>
-          </div>`
-   
-  });
+  listaContenedor.innerHTML = htmlTarjetas;
 }
 
 // Ejecutar la función al cargar la página
