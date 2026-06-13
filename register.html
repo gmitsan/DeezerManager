@@ -33,14 +33,14 @@
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Únete para disfrutar de la buena música</p>
       </div>
 
-      <form action="login.html" class="space-y-4">
+      <form onsubmit="registrarUsuario(event)" action="login.html" class="space-y-4">
         
         <div>
           <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Nombre de usuario</label>
           <div class="relative">
             <i class="fa-solid fa-user absolute left-4 top-3.5 text-slate-400"></i>
-            <input type="text" required placeholder="Ej: lorena_martinez" 
-                   class="w-full bg-slate-100 dark:bg-[#1f293d] text-slate-900 dark:text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 dark:focus:ring-[#8b5cf6] placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-300 border border-slate-200 dark:border-transparent">
+            <input type="text" id="username" required placeholder="Ej: lorena_martinez" 
+                  class="w-full bg-slate-100 dark:bg-[#1f293d] text-slate-900 dark:text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 dark:focus:ring-[#8b5cf6] placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-300 border border-slate-200 dark:border-transparent">
           </div>
         </div>
 
@@ -48,8 +48,8 @@
           <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Correo electrónico</label>
           <div class="relative">
             <i class="fa-solid fa-envelope absolute left-4 top-3.5 text-slate-400"></i>
-            <input type="email" required placeholder="tu@correo.com" 
-                   class="w-full bg-slate-100 dark:bg-[#1f293d] text-slate-900 dark:text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 dark:focus:ring-[#8b5cf6] placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-300 border border-slate-200 dark:border-transparent">
+            <input type="email" id="email" required placeholder="tu@correo.com" 
+                  class="w-full bg-slate-100 dark:bg-[#1f293d] text-slate-900 dark:text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 dark:focus:ring-[#8b5cf6] placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-300 border border-slate-200 dark:border-transparent">
           </div>
         </div>
 
@@ -57,8 +57,17 @@
           <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Contraseña</label>
           <div class="relative">
             <i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400"></i>
-            <input type="password" required placeholder="Mínimo 8 caracteres" 
-                   class="w-full bg-slate-100 dark:bg-[#1f293d] text-slate-900 dark:text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 dark:focus:ring-[#8b5cf6] placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-300 border border-slate-200 dark:border-transparent">
+            <input type="password" id="password" required placeholder="Mínimo 8 caracteres" 
+                  class="w-full bg-slate-100 dark:bg-[#1f293d] text-slate-900 dark:text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 dark:focus:ring-[#8b5cf6] placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-300 border border-slate-200 dark:border-transparent">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Confirmar contraseña</label>
+          <div class="relative">
+            <i class="fa-solid fa-key absolute left-4 top-3.5 text-slate-400"></i>
+            <input type="password" id="confirmPassword" required placeholder="Confirma tu contraseña" 
+                  class="w-full bg-slate-100 dark:bg-[#1f293d] text-slate-900 dark:text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 dark:focus:ring-[#8b5cf6] placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-300 border border-slate-200 dark:border-transparent">
           </div>
         </div>
 
@@ -70,8 +79,9 @@
         </div>
 
         <button type="submit" 
-                class="w-full bg-slate-900 dark:bg-white text-white dark:text-black font-bold py-3 px-4 rounded-xl text-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-md cursor-pointer mt-2">
-          Registrarse
+          class="w-full bg-slate-900 dark:bg-white text-white dark:text-black font-bold py-3 px-4 rounded-xl text-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-md cursor-pointer mt-2 flex items-center justify-center min-h-[48px]">
+          <span class="btn-text">Registrar</span>
+          <div class="btn-spinner hidden h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent ml-2"></div>
         </button>
       </form>
 
@@ -87,6 +97,6 @@
     &copy; 2026 Deezer-Manager. Todos los derechos reservados.
   </footer>
 
-  <script src="app.js"></script>
+  <script src="login.js"></script>
 </body>
 </html>
