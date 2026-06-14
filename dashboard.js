@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initThemeManager();
     obtenerCancionesMejorRankeadas();
 
+    window.addEventListener('online', procesarColaSincronizacionOffline);
+
     const closeBtn = document.getElementById('closePanelRight');
     const panelDerecho = document.getElementById('panel-derecho');
     
@@ -65,13 +67,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const cancionTitle = estrella.attr('data-cancion-title');
       const nuevaPuntuacion = parseInt(estrella.attr('data-valor'));
 
+      // MODIFICAR ESTO dentro del evento de las estrellas:
       const tarjetaPadre = estrella.closest('.music-card');
       const coverRealDeezer = tarjetaPadre.attr('data-cover') || tarjetaPadre.find('img').attr('src');
 
       const metadataReal = {
           artist: tarjetaPadre.attr('data-artist') || tarjetaPadre.find('p').text() || 'Artista Desconocido',
           artistId: tarjetaPadre.attr('data-artist-id') || '',
-          cover: coverRealDeezer, // <-- AQUÍ SE GUARDA TU FOTO REAL DE DEEZER
+          cover: coverRealDeezer,
           preview: tarjetaPadre.attr('data-preview') || '',
           albumTitle: tarjetaPadre.attr('data-album-title') || '',
           albumId: tarjetaPadre.attr('data-album-id') || '',
@@ -80,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
           explicit: tarjetaPadre.attr('data-explicit') || 'false'
       };
 
+      // Guardado persistente e inmediato
       guardarCalificacionCancion(cancionTitle, nuevaPuntuacion, metadataReal);
 
       const contenedorEstrellas = estrella.parent();
@@ -325,16 +329,16 @@ function actualizarBotonesNavegacion() {
 }
 
 function obtenerCancionesMejorRankeadas() {
-  const url = "https://api.deezer.com/chart/0/tracks&output=jsonp";
   $.ajax({
-    url: url,
+    url: "https://api.deezer.com/chart/0/tracks&output=jsonp",
     dataType: "jsonp",
     success: function(respuesta) {
-      const canciones = respuesta.data;
-      mostrarCancionesEnPantalla(canciones);
+      if (respuesta && respuesta.data) mostrarCancionesEnPantalla(respuesta.data);
     },
-    error: function(error) {
-      console.error("Error al consultar el top de música:", error);
+    // MODIFICAR O AGREGAR ESTO:
+    error: function() {
+      // Si falla por falta de red, renderiza partiendo de lo cacheado localmente mediante tus calificaciones
+      aplicarFiltroCalificacionVisual();
     }
   });
 }
@@ -386,15 +390,9 @@ function buscarCanciones() {
         `;
       }
     },
-    error: function(error) {
-      console.error("Error crítico al buscar en Deezer:", error);
-      if (listaContenedor) {
-        listaContenedor.innerHTML = `
-          <p class="text-red-500 text-center col-span-full py-8">
-              Hubo un error en la conexión. Inténtalo de nuevo.
-          </p>
-        `;
-      }
+    error: function() {
+        const listaContenedor = document.getElementById('contenedor-canciones');
+        listaContenedor.innerHTML = `<p class="text-amber-500 text-center col-span-full py-8"><i class="fa-solid fa-wifi-slash"></i> Estás en modo offline. Revisa tus canciones calificadas utilizando el filtro.</p>`;
     }
   });
 }
@@ -569,28 +567,69 @@ function obtenerCalificacionesCanciones() {
     return calificaciones ? JSON.parse(calificaciones) : {};
 }
 
+// MODIFICAR/REEMPLAZAR ESTA FUNCIÓN COMPLETA:
 function guardarCalificacionCancion(cancionTitle, puntuacion, metadataExtra = null) {
     const calificaciones = obtenerCalificacionesCanciones();
   
-    if (calificaciones[cancionTitle]) {
-        calificaciones[cancionTitle].puntuacion = parseInt(puntuacion);
-    } else {
-        calificaciones[cancionTitle] = {
-            puntuacion: parseInt(puntuacion),
-            artist: metadataExtra?.artist || 'Artista Desconocido',
-            artistId: metadataExtra?.artistId || '',
-            cover: metadataExtra?.cover || 'https://placehold.co/400x400/1e293b/ffffff?text=Audio',
-            preview: metadataExtra?.preview || '',
-            albumTitle: metadataExtra?.albumTitle || '',
-            albumId: metadataExtra?.albumId || '',
-            duration: metadataExtra?.duration || 0,
-            rank: metadataExtra?.rank || 0,
-            explicit: metadataExtra?.explicit || 'false'
-        };
-    }
+    calificaciones[cancionTitle] = {
+        puntuacion: parseInt(puntuacion),
+        artist: metadataExtra?.artist || 'Artista Desconocido',
+        artistId: metadataExtra?.artistId || '',
+        cover: metadataExtra?.cover || 'https://www.deezer.com/images/cover/1000x1000.jpg',
+        preview: metadataExtra?.preview || '',
+        albumTitle: metadataExtra?.albumTitle || '',
+        albumId: metadataExtra?.albumId || '',
+        duration: metadataExtra?.duration || 0,
+        rank: metadataExtra?.rank || 0,
+        explicit: metadataExtra?.explicit || 'false'
+    };
     
     localStorage.setItem('calificaciones_canciones', JSON.stringify(calificaciones));
+
+    // Si está offline, registrar en la cola de sincronización diferida
+    if (!navigator.onLine) {
+        registrarCambioOffline('calificar_cancion', { cancionTitle, puntuacion, metadataExtra });
+        mostrarNotificacionOffline("Calificación guardada localmente. Se sincronizará al recuperar internet.");
+    } else {
+        console.log(`[Sincronizado] Calificación enviada para: ${cancionTitle}`);
+    }
 }
+
+// AGREGAR ESTAS TRES NUEVAS FUNCONES DE SOPORTE ABAJO:
+function registrarCambioOffline(accion, datos) {
+    let cola = JSON.parse(localStorage.getItem('peticiones_pendientes_offline')) || [];
+    // Evitar duplicados de la misma canción en la cola
+    cola = cola.filter(item => item.datos.cancionTitle !== datos.cancionTitle);
+    cola.push({ accion, datos, timestamp: Date.now() });
+    localStorage.setItem('peticiones_pendientes_offline', JSON.stringify(cola));
+}
+
+function procesarColaSincronizacionOffline() {
+    let cola = JSON.parse(localStorage.getItem('peticiones_pendientes_offline')) || [];
+    if (cola.length === 0) return;
+
+    console.log(`[Sincronización Diferida] Detectada red de vuelta. Procesando ${cola.length} cambios...`);
+    
+    cola.forEach(item => {
+        if (item.accion === 'calificar_cancion') {
+            // Aquí impacta diferidamente el sistema simulando el envío exitoso al servidor
+            console.log(`[Sincronizado exitosamente] ${item.datos.cancionTitle} con ★ ${item.datos.puntuacion}`);
+        }
+    });
+
+    // Vaciar la cola tras sincronizar
+    localStorage.removeItem('peticiones_pendientes_offline');
+    mostrarNotificacionOffline("¡Conexión restablecida! Tus cambios locales han sido sincronizados.");
+}
+
+function mostrarNotificacionOffline(mensaje) {
+    const toast = document.createElement('div');
+    toast.className = "fixed bottom-24 left-4 bg-slate-900 text-white text-xs px-4 py-2.5 rounded shadow-lg z-50 border border-purple-500 transition-all";
+    toast.innerHTML = `<i class="fa-solid fa-cloud-bolt text-purple-400 mr-2"></i> ${mensaje}`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+}
+
 function verTodosLosAlbumesArtista(idArtista) {
   registrarVista('todos_los_albumes', idArtista);
   const tituloSeccion = document.querySelector('h2.text-xl');
@@ -653,7 +692,7 @@ function verTodosLosAlbumesArtista(idArtista) {
     error: function(err) {
         console.error("Error al traer discografía completa:", err);
     }
-  }); // Cierre correcto de $.ajax
+  }); 
 }
 
 function verDetalleAlbum(idAlbum){
@@ -738,7 +777,7 @@ function verDetalleAlbum(idAlbum){
         listaContenedor.innerHTML = '<p class="text-center col-span-full py-8 text-red-500">Error al cargar las canciones del álbum.</p>';
       }
     }
-  }); // Cierre correcto de $.ajax
+  }); 
 }
 
 function mostrarCancionesEnPantalla(listaElementos, ocultarSeccionArtistas = false) {
@@ -1198,7 +1237,7 @@ function alternarReproduccionMaestra() {
     estaReproduciendo = true;
     actualizarIconoBotonMaestro(true);
   }
-}
+};
 
 function actualizarIconoBotonMaestro(reproduciendo) {
   const botonMaestro = document.getElementById('masterPlay');

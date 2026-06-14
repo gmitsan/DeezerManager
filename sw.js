@@ -1,5 +1,7 @@
-// sw.js (Debe estar en la raíz del proyecto)
-const CACHE_NAME = 'music-app';
+// sw.js
+const CACHE_NAME = 'music-app-v1';
+const DYNAMIC_CACHE = 'deezer-dynamic-cache';
+
 const ASSETS_TO_CACHE = [
   '/',
   '/login.html',
@@ -8,6 +10,7 @@ const ASSETS_TO_CACHE = [
   '/dashboard.js'
 ];
 
+// Instalación: Guardar archivos estáticos esenciales
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
@@ -15,40 +18,42 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
+// Activación: Limpieza de cachés antiguas
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(
-      keys.map((key) => { if (key !== CACHE_NAME) return caches.delete(key); })
+      keys.map((key) => {
+        if (key !== CACHE_NAME && key !== DYNAMIC_CACHE) {
+          return caches.delete(key);
+        }
+      })
     ))
   );
   self.clients.claim();
 });
 
-// ESTRATEGIA EXCLUSIVA PARA EL PROYECTO
+// Intercepción de Red y Estrategia de Caché
 self.addEventListener('fetch', (event) => {
   const url = event.request.url;
 
-  // Si son peticiones a la API de Deezer (búsquedas, álbumes, artistas, etc.)
+  // Interceptar peticiones orientadas a Deezer (incluyendo variaciones de JSONP simuladas o fetch directo)
   if (url.includes('api.deezer.com')) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          // Si hay internet y la respuesta es válida, guardamos una copia dinámica
           if (response.status === 200) {
             const responseClone = response.clone();
-            caches.open('deezer-dynamic-cache').then((cache) => {
-              cache.put(event.request, responseClone);
-            });
+            caches.open(DYNAMIC_CACHE).then((cache) => cache.put(event.request, responseClone));
           }
           return response;
         })
         .catch(() => {
-          // SI NO HAY INTERNET: Buscamos si el usuario ya había entrado a este álbum/artista antes
+          // Fallback en modo Offline: Buscar en la caché dinámica
           return caches.match(event.request).then((cachedResponse) => {
             if (cachedResponse) return cachedResponse;
             
-            // Si nunca lo visitó, devolvemos un JSON vacío estructurado para que jQuery no rompa el código
-            return new Response(JSON.stringify({ data: [], error: "offline" }), {
+            // Si no está en caché, devolvemos una respuesta vacía limpia para evitar que la app explote
+            return new Response(JSON.stringify({ data: [], total: 0, error: "offline" }), {
               headers: { 'Content-Type': 'application/json' }
             });
           });
@@ -57,7 +62,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Para los archivos locales del proyecto (HTML, JS, CSS)
+  // Estrategia Network-First con Fallback a Caché para recursos locales
   event.respondWith(
     fetch(event.request)
       .then((response) => {
