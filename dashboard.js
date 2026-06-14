@@ -44,13 +44,57 @@ document.addEventListener('DOMContentLoaded', () => {
             verMisAlbumesGuardados();
         });
     }
-
+    const filtroCalificacion = document.getElementById('filtroCalificacion');
+    if (filtroCalificacion) {
+        filtroCalificacion.addEventListener('change', () => {
+            aplicarFiltroCalificacionVisual();
+        });
+    }
     registrarVista('inicio', null);
-    
-    // NUEVO: Carga tus álbumes favoritos en la barra lateral apenas entras
     actualizarSidebarFavoritos();
+    
 });
 
+function aplicarFiltroCalificacionVisual() {
+    const reglaFiltro = $('#filtroCalificacion').val() || 'todos';
+
+    const calificacionesCanciones = obtenerCalificacionesCanciones();
+
+    $('#contenedor-canciones .music-card').each(function() {
+        const tarjeta = $(this);
+
+        if (tarjeta.hasClass('album-item') || tarjeta.hasClass('artista-item')) {
+            tarjeta.show();
+            return;
+        }
+        const cancionTitle = tarjeta.attr('data-title');
+        const puntuacionCancion = calificacionesCanciones[cancionTitle] || 0;
+
+        if (reglaFiltro === 'todos') {
+            tarjeta.show();
+        } else if (reglaFiltro === '5' && puntuacionCancion === 5) {
+            tarjeta.show();
+        } else if (reglaFiltro === '4' && puntuacionCancion >= 4) {
+            tarjeta.show();
+        } else if (reglaFiltro === '3' && puntuacionCancion >= 3) {
+            tarjeta.show();
+        } else if (reglaFiltro === '1' && puntuacionCancion >= 1) {
+            tarjeta.show();
+        } else if (reglaFiltro === '0' && puntuacionCancion === 0) {
+            tarjeta.show();
+        } else {
+            tarjeta.hide(); 
+        }
+    });
+}
+
+function ajustarVisibilidadSubtitulos() {
+    $('#contenedor-canciones h2').each(function() {
+        const h2 = $(this);
+        const contenedorSeccion = h2.parent();
+        const tarjetasHermanas = contenedorSeccion.nextAll('.music-card').not(contenedorSeccion.nextAll('div:has(h2)').nextAll());
+    });
+}
 function ejecutarVistaHistorial(vista) {
     navegandoHistorial = true;
     
@@ -337,16 +381,34 @@ function verDetalleArtista(idArtista) {
             });
         }
 
-        // SECCIÓN CANCIONES POPULARES
+        // SECCIÓN CANCIONES POPULARES (MODIFICADA CON LOCALSTORAGE)
         if (canciones.length > 0) {
             htmlFinal += `
                 <div class="col-span-full mt-8 mb-2">
                     <h2 class="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">Canciones populares</h2>
                 </div>
             `;
+            
+            const calificacionesCanciones = obtenerCalificacionesCanciones();
+
             canciones.forEach(cancion => {
                 const coverImg = (cancion.album && (cancion.album.cover_medium || cancion.album.cover)) ? cancion.album.cover_medium || cancion.album.cover : 'https://www.deezer.com/images/cover/1000x1000.jpg';
                 
+                const calificacionActual = calificacionesCanciones[cancion.title] || 0;
+                let estrellasHTML = '<div class="star-rating flex text-sm gap-0.5 z-20 relative">';
+                for (let i = 1; i <= 5; i++) {
+                    const claseEstrella = i <= calificacionActual 
+                        ? 'fa-solid fa-star text-amber-400' 
+                        : 'fa-regular fa-star text-slate-300 dark:text-slate-600 hover:text-amber-400';
+                    
+                    estrellasHTML += `
+                        <i class="${claseEstrella} cursor-pointer estrella-cancion-voto" 
+                           data-cancion-title="${cancion.title}" 
+                           data-valor="${i}">
+                        </i>`;
+                }
+                estrellasHTML += '</div>';
+
                 htmlFinal += `
                   <div class="music-card bg-slate-50 dark:bg-[#1a2333] p-4 rounded-md hover:bg-slate-100 dark:hover:bg-[#243147] transition-colors duration-200 group relative cursor-pointer border border-slate-200 dark:border-transparent" 
                        data-title="${cancion.title}" data-artist="${cancion.artist.name}">
@@ -358,13 +420,8 @@ function verDetalleArtista(idArtista) {
                     </div>
                     <h3 class="text-sm font-bold truncate mb-1 text-slate-900 dark:text-white">${cancion.title}</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 truncate">${cancion.artist.name}</p>
-                    <div class="star-rating flex text-sm text-slate-300 dark:text-slate-600 gap-0.5">
-                      <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="1"></i>
-                      <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="2"></i>
-                      <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="3"></i>
-                      <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="4"></i>
-                      <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="5"></i>
-                    </div>
+                    
+                    ${estrellasHTML}
                   </div>
                 `;
             });
@@ -377,15 +434,24 @@ function verDetalleArtista(idArtista) {
         $('#btnVerMasAlbumes').on('click', function() {
             verTodosLosAlbumesArtista(idArtista);
         });
-
-        // Eventos unificados para mapear clicks y corazones
         mapearEventosAlbumes();
+        mapearEventosCalificacionesCanciones(); 
+        aplicarFiltroCalificacionVisual();
 
     }).fail(function(err) {
         console.error("Error cargando componentes del artista:", err);
     });
 }
+function obtenerCalificacionesCanciones() {
+    const calificaciones = localStorage.getItem('calificaciones_canciones');
+    return calificaciones ? JSON.parse(calificaciones) : {};
+}
 
+function guardarCalificacionCancion(cancionTitle, puntuacion) {
+    const calificaciones = obtenerCalificacionesCanciones();
+    calificaciones[cancionTitle] = parseInt(puntuacion);
+    localStorage.setItem('calificaciones_canciones', JSON.stringify(calificaciones));
+}
 function verTodosLosAlbumesArtista(idArtista) {
   registrarVista('todos_los_albumes', idArtista);
     const tituloSeccion = document.querySelector('h2.text-xl');
@@ -417,11 +483,25 @@ function verTodosLosAlbumesArtista(idArtista) {
 
             let htmlFinal = '';
             const favoritos = obtenerAlbumesFavoritos();
+            const calificacionesGuardadas = obtenerCalificaciones();
             
             albumes.forEach(album => {
                 const esFavorito = favoritos.some(fav => fav.id == album.id);
                 const iconoCorazon = esFavorito ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart text-slate-400 hover:text-red-500';
-
+                const calificacionActual = calificacionesGuardadas[album.id] || 0;
+                let estrellasHTML = '<div class="contenedor-estrellas flex gap-1 mt-2 z-20 relative">';
+                for (let i = 1; i <= 5; i++) {
+                    const claseEstrella = i <= calificacionActual 
+                        ? 'fa-solid fa-star text-yellow-400' 
+                        : 'fa-regular fa-star text-slate-400 hover:text-yellow-400';
+                    
+                    estrellasHTML += `
+                        <i class="${claseEstrella} cursor-pointer estrella-voto" 
+                           data-album-id="${album.id}" 
+                           data-valor="${i}">
+                        </i>`;
+                }
+                estrellasHTML += '</div>';
                 htmlFinal += `
                   <div class="music-card album-item bg-slate-50 dark:bg-[#1a2333] p-4 rounded-md hover:bg-slate-100 dark:hover:bg-[#243147] transition-colors duration-200 group relative cursor-pointer border border-slate-200 dark:border-transparent" data-album-id="${album.id}">
                     <div class="relative mb-3 aspect-square w-full">
@@ -435,6 +515,9 @@ function verTodosLosAlbumesArtista(idArtista) {
                     </div>
                     <h3 class="text-sm font-bold truncate mb-1 text-slate-900 dark:text-white">${album.title}</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Lanzamiento: ${album.release_date ? album.release_date.split('-')[0] : 'N/A'}</p>
+                    
+                    ${estrellasHTML}
+
                   </div>
                 `;
             });
@@ -623,20 +706,34 @@ function mostrarCancionesEnPantalla(listaElementos, ocultarSeccionArtistas = fal
         });
     }
 
-    // SECCIÓN DE CANCIONES
+    // SECCIÓN DE CANCIONES (CORREGIDA Y COMPLETA)
     if (canciones.length > 0) {
         htmlFinal += `
             <div class="col-span-full mt-8 mb-2">
                 <h2 class="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">Canciones</h2>
             </div>
         `;
+        
+        const calificacionesCanciones = obtenerCalificacionesCanciones();
+
         canciones.forEach(cancion => {
             const coverImg = (cancion.album && (cancion.album.cover_medium || cancion.album.cover)) ? cancion.album.cover_medium || cancion.album.cover : 'https://www.deezer.com/images/cover/1000x1000.jpg';
             const artistaName = cancion.artist ? cancion.artist.name : 'Artista Desconocido';
 
+            const calificacionActual = calificacionesCanciones[cancion.title] || 0;
+            let estrellasHTML = '<div class="star-rating flex text-sm gap-0.5 z-20 relative mt-2">';
+            for (let i = 1; i <= 5; i++) {
+                const claseEstrella = i <= calificacionActual 
+                    ? 'fa-solid fa-star text-amber-400' 
+                    : 'fa-regular fa-star text-slate-300 dark:text-slate-600 hover:text-amber-400';
+                
+                estrellasHTML += `<i class="${claseEstrella} cursor-pointer estrella-cancion-voto" data-cancion-title="${cancion.title}" data-valor="${i}"></i>`;
+            }
+            estrellasHTML += '</div>';
+
             htmlFinal += `
               <div class="music-card bg-slate-50 dark:bg-[#1a2333] p-4 rounded-md hover:bg-slate-100 dark:hover:bg-[#243147] transition-colors duration-200 group relative cursor-pointer border border-slate-200 dark:border-transparent" 
-                   data-title="${cancion.title}" data-artist="${artistaName}">
+                  data-title="${cancion.title}" data-artist="${artistaName}">
                 <div class="relative mb-3 aspect-square w-full">
                   <img src="${coverImg}" class="rounded w-full h-full object-cover shadow-md" alt="Cover">
                   <button class="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-purple-600 dark:bg-[#8b5cf6] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200 shadow-lg">
@@ -645,13 +742,9 @@ function mostrarCancionesEnPantalla(listaElementos, ocultarSeccionArtistas = fal
                 </div>
                 <h3 class="text-sm font-bold truncate mb-1 text-slate-900 dark:text-white">${cancion.title}</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 truncate">${artistaName}</p>
-                <div class="star-rating flex text-sm text-slate-300 dark:text-slate-600 gap-0.5">
-                  <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="1"></i>
-                  <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="2"></i>
-                  <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="3"></i>
-                  <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="4"></i>
-                  <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="5"></i>
-                </div>
+                
+                ${estrellasHTML}
+
               </div>
             `;
         });
@@ -665,6 +758,8 @@ function mostrarCancionesEnPantalla(listaElementos, ocultarSeccionArtistas = fal
     });
 
     mapearEventosAlbumes();
+    mapearEventosCalificacionesCanciones(); // <-- Activamos los clics de votación de las canciones
+    aplicarFiltroCalificacionVisual();  
 }
 
 // --- SISTEMA COMPLETO DE ÁLBUMES FAVORITOS ---
@@ -744,6 +839,7 @@ function verMisAlbumesGuardados() {
     });
     contenedor.innerHTML = html;
     mapearEventosAlbumes();
+    aplicarFiltroCalificacionVisual();
 }
 
 function mapearEventosAlbumes() {
@@ -769,6 +865,30 @@ function mapearEventosAlbumes() {
                 verMisAlbumesGuardados();
             }
         }
+    });
+}
+function mapearEventosCalificacionesCanciones() {
+    $('.estrella-cancion-voto').off('click').on('click', function(e) {
+        e.stopPropagation(); 
+        
+        const estrella = $(this);
+        const cancionTitle = estrella.attr('data-cancion-title');
+        const nuevaPuntuacion = parseInt(estrella.attr('data-valor'));
+
+        guardarCalificacionCancion(cancionTitle, nuevaPuntuacion);
+
+        const contenedorEstrellas = estrella.parent();
+        contenedorEstrellas.find('.estrella-cancion-voto').each(function() {
+            const valorEstrella = parseInt($(this).attr('data-valor'));
+            if (valorEstrella <= nuevaPuntuacion) {
+                $(this).attr('class', 'fa-solid fa-star cursor-pointer estrella-cancion-voto text-amber-400');
+            } else {
+                $(this).attr('class', 'fa-regular fa-star cursor-pointer estrella-cancion-voto text-slate-300 dark:text-slate-600 hover:text-amber-400');
+            }
+        });
+
+        // NUEVO: Ejecuta el filtro inmediatamente tras votar para refrescar la vista
+        aplicarFiltroCalificacionVisual(); 
     });
 }
 
