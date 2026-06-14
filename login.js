@@ -121,8 +121,73 @@ function inicioUsuario(event) {
             btnSubmit.disabled = false;
         }
     }, 1000);
-    
 }
+
+function recuperarContrasena(event) {
+    event.preventDefault();
+    const formulario = event.target;
+
+    activarSpinnerFormulario(formulario);
+
+    const email = document.getElementById('email').value.trim();
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+
+    // Remover cualquier mensaje previo antes de validar
+    const mensajePrevio = document.getElementById('resultado-recuperacion');
+    if (mensajePrevio) mensajePrevio.remove();
+
+    setTimeout(() => {
+        const usuarioEncontrado = users.find(user => user.email === email);
+
+        // Creamos el contenedor para el mensaje que irá abajo del formulario
+        const contenedorMensaje = document.createElement('div');
+        contenedorMensaje.id = 'resultado-recuperacion';
+        contenedorMensaje.className = 'mt-6 p-4 rounded-xl text-sm transition-all duration-300 border animate-fade-in shadow-sm';
+
+        if (usuarioEncontrado) {
+            // Diseño verde de éxito que revela la contraseña simulada
+            contenedorMensaje.classList.add('bg-emerald-50', 'dark:bg-emerald-950/20', 'text-emerald-800', 'dark:text-emerald-400', 'border-emerald-200', 'dark:border-transparent');
+            contenedorMensaje.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-circle-check mt-0.5 text-base text-emerald-600 dark:text-emerald-400"></i>
+                    <div class="space-y-1">
+                        <p class="font-bold">¡Usuario verificado con éxito!</p>
+                        <p class="text-xs text-emerald-700/90 dark:text-emerald-400/80">
+                            Como este es un entorno de desarrollo local, hemos interceptado las credenciales:
+                        </p>
+                        <div class="mt-2 p-2 bg-white dark:bg-[#121826] rounded border border-emerald-200 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs select-all cursor-pointer text-center break-all">
+                            <strong>Contraseña:</strong> ${usuarioEncontrado.password}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Limpiamos el campo del correo electrónico
+            if (email) email.value = '';
+        } else {
+            // Diseño rojo de error si el correo no existe
+            contenedorMensaje.classList.add('bg-rose-50', 'dark:bg-rose-950/20', 'text-rose-800', 'dark:text-rose-400', 'border-rose-200', 'dark:border-transparent');
+            contenedorMensaje.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-circle-xmark mt-0.5 text-base text-rose-600 dark:text-rose-400"></i>
+                    <div>
+                        <p class="font-bold">Error de verificación</p>
+                        <p class="text-xs text-rose-700/90 dark:text-rose-400/80">El correo electrónico <strong>${email}</strong> no coincide con ninguna cuenta registrada.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Insertamos el bloque de respuesta exactamente abajo del formulario
+        formulario.parentNode.appendChild(contenedorMensaje);
+        
+        // Apagamos el spinner de carga para restaurar el botón
+        desactivarSpinnerFormulario(formulario);
+    }, 1500); 
+}
+
+
+
 // --- FUNCIONES DEL SPINNER  ---
 function activarSpinnerFormulario(formulario) { 
     
