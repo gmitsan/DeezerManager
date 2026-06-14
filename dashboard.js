@@ -397,9 +397,23 @@ function verDetalleArtista(idArtista) {
             <h2 class="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">Canciones populares</h2>
         </div>
       `;
+      
+      const calificacionesCanciones = obtenerCalificacionesCanciones();
+
       canciones.forEach(cancion => {
         const coverImg = (cancion.album && (cancion.album.cover_medium || cancion.album.cover)) ? cancion.album.cover_medium || cancion.album.cover : 'https://www.deezer.com/images/cover/1000x1000.jpg';
         
+        const calificacionActual = calificacionesCanciones[cancion.title] || 0;
+        let estrellasHTML = '<div class="star-rating flex text-sm gap-0.5 z-20 relative mt-2">';
+        for (let i = 1; i <= 5; i++) {
+            const claseEstrella = i <= calificacionActual 
+                ? 'fa-solid fa-star text-amber-400' 
+                : 'fa-regular fa-star text-slate-300 dark:text-slate-600 hover:text-amber-400';
+            
+            estrellasHTML += `<i class="${claseEstrella} cursor-pointer estrella-cancion-voto" data-cancion-title="${cancion.title}" data-valor="${i}"></i>`;
+        }
+        estrellasHTML += '</div>';
+
         htmlFinal += `
           <div class="music-card bg-slate-50 dark:bg-[#1a2333] p-4 rounded-md hover:bg-slate-100 dark:hover:bg-[#243147] transition-colors duration-200 group relative cursor-pointer border border-slate-200 dark:border-transparent" 
                 data-title="${cancion.title}" data-artist="${cancion.artist.name}">
@@ -411,13 +425,8 @@ function verDetalleArtista(idArtista) {
             </div>
             <h3 class="text-sm font-bold truncate mb-1 text-slate-900 dark:text-white">${cancion.title}</h3>
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 truncate">${cancion.artist.name}</p>
-            <div class="star-rating flex text-sm text-slate-300 dark:text-slate-600 gap-0.5">
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="1"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="2"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="3"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="4"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="5"></i>
-            </div>
+            
+            ${estrellasHTML}
           </div>
         `;
       });
@@ -505,74 +514,15 @@ function verTodosLosAlbumesArtista(idArtista) {
         listaContenedor.innerHTML = htmlFinal;
       }
 
-    $.ajax({
-        url: urlAlbumesCompleto,
-        dataType: "jsonp",
-        success: function(respuesta) {
-            const albumes = respuesta.data || [];
-            
-            if (albumes.length > 0 && tituloSeccion) {
-                tituloSeccion.textContent = `Todos los álbumes`;
-            }
-
-            if (listaContenedor) {
-                listaContenedor.innerHTML = '';
-            }
-
-            let htmlFinal = '';
-            const favoritos = obtenerAlbumesFavoritos();
-            const calificacionesGuardadas = obtenerCalificaciones();
-            
-            albumes.forEach(album => {
-                const esFavorito = favoritos.some(fav => fav.id == album.id);
-                const iconoCorazon = esFavorito ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart text-slate-400 hover:text-red-500';
-                const calificacionActual = calificacionesGuardadas[album.id] || 0;
-                let estrellasHTML = '<div class="contenedor-estrellas flex gap-1 mt-2 z-20 relative">';
-                for (let i = 1; i <= 5; i++) {
-                    const claseEstrella = i <= calificacionActual 
-                        ? 'fa-solid fa-star text-yellow-400' 
-                        : 'fa-regular fa-star text-slate-400 hover:text-yellow-400';
-                    
-                    estrellasHTML += `
-                        <i class="${claseEstrella} cursor-pointer estrella-voto" 
-                           data-album-id="${album.id}" 
-                           data-valor="${i}">
-                        </i>`;
-                }
-                estrellasHTML += '</div>';
-                htmlFinal += `
-                  <div class="music-card album-item bg-slate-50 dark:bg-[#1a2333] p-4 rounded-md hover:bg-slate-100 dark:hover:bg-[#243147] transition-colors duration-200 group relative cursor-pointer border border-slate-200 dark:border-transparent" data-album-id="${album.id}">
-                    <div class="relative mb-3 aspect-square w-full">
-                      <img src="${album.cover_medium || album.cover}" class="rounded w-full h-full object-cover shadow-md" alt="${album.title}">
-                      <button class="btn-favorito-corazon absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 dark:bg-[#121826]/90 flex items-center justify-center opacity-100 md:opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md z-10"
-                              data-id="${album.id}" 
-                              data-title="${album.title}" 
-                              data-cover="${album.cover_medium || album.cover}">
-                        <i class="${iconoCorazon} text-sm"></i>
-                      </button>
-                    </div>
-                    <h3 class="text-sm font-bold truncate mb-1 text-slate-900 dark:text-white">${album.title}</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Lanzamiento: ${album.release_date ? album.release_date.split('-')[0] : 'N/A'}</p>
-                    
-                    ${estrellasHTML}
-
-                  </div>
-                `;
-            });
-
-            if (listaContenedor) {
-                listaContenedor.innerHTML = htmlFinal;
-            }
-
-            mapearEventosAlbumes();
-        },
-        error: function(err) {
-            console.error("Error al traer discografía completa:", err);
-        }
-    });
+      mapearEventosAlbumes();
+      },
+    error: function(err) {
+        console.error("Error al traer discografía completa:", err);
+    }
+  }); // Cierre correcto de $.ajax
 }
 
-function verDetalleAlbum(idAlbum) {
+function verDetalleAlbum(idAlbum){
   registrarVista('album', idAlbum);
   const panelDerecho = document.getElementById('panel-derecho');
   if (panelDerecho) {
@@ -654,7 +604,7 @@ function verDetalleAlbum(idAlbum) {
         listaContenedor.innerHTML = '<p class="text-center col-span-full py-8 text-red-500">Error al cargar las canciones del álbum.</p>';
       }
     }
-  });
+  }); // Cierre correcto de $.ajax
 }
 
 function mostrarCancionesEnPantalla(listaElementos, ocultarSeccionArtistas = false) {
@@ -751,6 +701,9 @@ function mostrarCancionesEnPantalla(listaElementos, ocultarSeccionArtistas = fal
         <h2 class="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">Canciones</h2>
       </div>
     `;
+
+    const calificacionesCanciones = obtenerCalificacionesCanciones();
+
     canciones.forEach(cancion => {
       const coverImg = (cancion.album && (cancion.album.cover_medium || cancion.album.cover)) ? cancion.album.cover_medium || cancion.album.cover : 'https://www.deezer.com/images/cover/1000x1000.jpg';
       const artistaName = cancion.artist ? cancion.artist.name : 'Artista Desconocido';
@@ -759,12 +712,22 @@ function mostrarCancionesEnPantalla(listaElementos, ocultarSeccionArtistas = fal
       const albumId = cancion.album ? cancion.album.id : '';
       const duracion = cancion.duration || 0;
       const ranking = cancion.rank || 0;
-      
-      // Validamos si es explícita
       const esExplicito = cancion.explicit_lyrics ? 'true' : 'false';
       const badgeExplicito = cancion.explicit_lyrics 
         ? `<span class="inline-flex items-center justify-center bg-red-500 text-white text-[9px] font-extrabold px-1 rounded ml-1.5 shadow-sm h-3.5 w-3.5 select-none shrink-0" title="Contenido Explícito">E</span>` 
         : '';
+
+      // Generar estrellas según el LocalStorage
+      const calificacionActual = calificacionesCanciones[cancion.title] || 0;
+      let estrellasHTML = '<div class="star-rating flex text-sm gap-0.5 z-20 relative mt-2">';
+      for (let i = 1; i <= 5; i++) {
+          const claseEstrella = i <= calificacionActual 
+              ? 'fa-solid fa-star text-amber-400' 
+              : 'fa-regular fa-star text-slate-300 dark:text-slate-600 hover:text-amber-400';
+          
+          estrellasHTML += `<i class="${claseEstrella} cursor-pointer estrella-cancion-voto" data-cancion-title="${cancion.title}" data-valor="${i}"></i>`;
+      }
+      estrellasHTML += '</div>';
 
       htmlFinal += `
         <div class="music-card cancion-item bg-slate-50 dark:bg-[#1a2333] p-4 rounded-md hover:bg-slate-100 dark:hover:bg-[#243147] transition-colors duration-200 group relative cursor-pointer border border-slate-200 dark:border-transparent" 
@@ -788,13 +751,8 @@ function mostrarCancionesEnPantalla(listaElementos, ocultarSeccionArtistas = fal
               <span class="truncate">${cancion.title}</span> ${badgeExplicito}
           </h3>
           <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 truncate">${artistaName}</p>
-          <div class="star-rating flex text-sm text-slate-300 dark:text-slate-600 gap-0.5">
-            <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="1"></i>
-            <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="2"></i>
-            <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="3"></i>
-            <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="4"></i>
-            <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="5"></i>
-          </div>
+          
+          ${estrellasHTML}
         </div>
       `;
     });
@@ -903,9 +861,7 @@ function mostrarCancionesEnPantalla(listaElementos, ocultarSeccionArtistas = fal
         verDetalleArtista(idArtista);
     });
 
-    mapearEventosAlbumes();
-    mapearEventosCalificacionesCanciones(); // <-- Activamos los clics de votación de las canciones
-    aplicarFiltroCalificacionVisual();  
+    
     const badgeExplicitoPanel = esExplicito 
       ? `<div class="flex items-center gap-2 text-red-500 font-bold bg-red-50 dark:bg-red-950/20 p-1.5 rounded border border-red-200 dark:border-transparent text-[11px]">
             <i class="fa-solid fa-triangle-exclamation"></i> <span>Contenido Explícito (Explicit Lyrics)</span>
@@ -960,14 +916,17 @@ function mostrarCancionesEnPantalla(listaElementos, ocultarSeccionArtistas = fal
       reproducirCancion(urlPreview, titulo, artista);
     }
   });
-}
+  mapearEventosAlbumes();
+    mapearEventosCalificacionesCanciones(); // <-- Activamos los clics de votación de las canciones
+    aplicarFiltroCalificacionVisual();  
+};
 
 // --- SISTEMA COMPLETO DE ÁLBUMES FAVORITOS ---
 
 function obtenerAlbumesFavoritos() {
   const favs = localStorage.getItem('albumes_favoritos');
   return favs ? JSON.parse(favs) : [];
-}
+};
 
 function alternarFavoritoAlbum(albumData) {
   let favorites = obtenerAlbumesFavoritos();
@@ -1189,4 +1148,4 @@ function actualizarIconoBotonMaestro(reproduciendo) {
     if (botonMaestro) botonMaestro.innerHTML = '<i class="fa-solid fa-play ml-0.5"></i>';
     if (botonPanel) botonPanel.innerHTML = '<i class="fa-solid fa-play ml-0.5"></i>';
   }
-}
+};
