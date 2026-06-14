@@ -18,116 +18,72 @@
   <div class="flex-1 flex overflow-hidden p-2 gap-2 h-[calc(100vh-90px)]">
     
     <aside class="hidden md:flex flex-col w-80 bg-white dark:bg-[#121826] rounded-lg p-4 flex-shrink-0 justify-between transition-colors duration-300 shadow-sm border border-slate-200 dark:border-transparent">
-      <div>
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-            <i class="fa-solid fa-layer-group text-xl text-purple-600 dark:text-[#8b5cf6]"></i>
-            <span class="font-bold text-slate-800 dark:text-slate-200">Tu biblioteca</span>
+      <div class="space-y-3">
+        <div id="btn-mis-albumes" class="flex items-center gap-3 p-2 bg-slate-50 dark:bg-[#1f293d]/50 rounded-md border border-slate-200 dark:border-[#8b5cf6]/20 transition-colors duration-300 cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1f293d]">
+          <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-500 dark:from-[#8b5cf6] dark:to-[#ec4899] rounded flex items-center justify-center shadow-sm">
+            <i class="fa-solid fa-heart text-white text-lg"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Mis Álbumes</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Colección Guardada</p>
           </div>
         </div>
-        
-        <div class="space-y-3">
-          <div class="flex items-center gap-3 p-2 bg-slate-50 dark:bg-[#1f293d]/50 rounded-md border border-slate-200 dark:border-[#8b5cf6]/20 transition-colors duration-300">
-            <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-500 dark:from-[#8b5cf6] dark:to-[#ec4899] rounded flex items-center justify-center shadow-sm">
-              <i class="fa-solid fa-heart text-white text-lg"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Mis Álbumes</h4>
-              <p class="text-xs text-slate-500 dark:text-slate-400">Colección Guardada</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div class="border-t border-slate-200 dark:border-[#1f293d] pt-4 flex items-center justify-between transition-colors duration-300">
-        <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Aspecto</span>
-        <button id="themeToggle" class="bg-slate-200 dark:bg-[#1f293d] hover:scale-105 text-xs text-slate-800 dark:text-purple-300 font-bold px-4 py-2 rounded-full transition-all duration-300 shadow-sm flex items-center gap-2 cursor-pointer">
-          <i id="themeIcon" class="fa-solid fa-moon text-purple-600 dark:text-[#8b5cf6]"></i> 
-          <span id="themeText">Modo Oscuro</span>
-        </button>
+        <div id="lista-favoritos-sidebar" class="mt-4 space-y-2 max-h-[380px] overflow-y-auto pr-1">
+          </div>
       </div>
     </aside>
 
     <main class="flex-1 bg-white dark:bg-[#121826] rounded-lg p-6 flex flex-col overflow-y-auto relative transition-colors duration-300 shadow-sm border border-slate-200 dark:border-transparent">
       
-      <header class="flex items-center justify-between gap-4 mb-6 sticky top-0 bg-white dark:bg-[#121826] py-2 z-10 transition-colors duration-300">
+      <header class="flex items-center justify-center gap-4 mb-6 sticky top-0 bg-white dark:bg-[#121826] py-2 z-10 transition-colors duration-300">
+
         <div class="flex items-center gap-2">
-          <button class="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#0b0f19] flex items-center justify-center text-slate-500 dark:text-slate-400"><i class="fa-solid fa-chevron-left"></i></button>
-          <button class="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#0b0f19] flex items-center justify-center text-slate-500 dark:text-slate-400"><i class="fa-solid fa-chevron-right"></i></button>
+          <button id="nav-atras" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#0b0f19] flex items-center justify-center text-slate-500 dark:text-slate-400 cursor-pointer disabled:opacity-30 btn-historial-atras" disabled>
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <button id="nav-adelante" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#0b0f19] flex items-center justify-center text-slate-500 dark:text-slate-400 cursor-pointer disabled:opacity-30 btn-historial-adelante" disabled>
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
         </div>
-
-        <div class="flex-1 max-w-md relative">
+        
+        <div class="flex-1 max-w-2xl relative">
           <i class="fa-solid fa-magnifying-glass absolute left-4 top-3 text-slate-400 dark:text-slate-400"></i>
-          <input type="text" placeholder="Buscar música, artistas, álbumes..." class="w-full bg-slate-100 dark:bg-[#1f293d] text-slate-900 dark:text-slate-200 pl-10 pr-4 py-2 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 dark:focus:ring-[#8b5cf6] placeholder-slate-400 dark:placeholder-slate-400 transition-colors duration-300 border border-slate-200 dark:border-transparent">
+          <input type="text" id="searchInput" oninput="buscarCanciones()" placeholder="Buscar música, artistas, álbumes..." class="w-full bg-slate-100 dark:bg-[#1f293d] text-slate-900 dark:text-slate-200 pl-10 pr-4 py-2 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 dark:focus:ring-[#8b5cf6] placeholder-slate-400 dark:placeholder-slate-400 transition-colors duration-300 border border-slate-200 dark:border-transparent">
         </div>
-          <a href="login.html" 
-            class="flex items-center gap-2 bg-slate-100 dark:bg-[#1f293d] hover:bg-red-50 dark:hover:bg-red-950/30 text-slate-700 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 px-3 py-2 rounded-full text-xs font-bold transition-all duration-200 border border-slate-200 dark:border-transparent cursor-pointer group shrink-0 shadow-sm">
-            <i class="fa-solid fa-right-from-bracket transition-transform group-hover:translate-x-0.5"></i>
-            <span class="hidden sm:inline" onclick="cerrarSesion()">Cerrar sesión</span>
-          </a>
-        </header>
 
-      <div class="flex gap-2 mb-6 overflow-x-auto pb-1">
-        <button class="bg-slate-900 dark:bg-white text-white dark:text-black text-xs font-bold px-4 py-2 rounded-full h-8 flex items-center justify-center shrink-0 transition-colors duration-300">Todo</button>
-        <button class="bg-slate-100 dark:bg-[#1f293d] hover:bg-slate-200 dark:hover:bg-[#2d3a54] text-slate-800 dark:text-slate-200 text-xs font-bold px-4 py-2 rounded-full h-8 flex items-center justify-center shrink-0 transition-colors duration-300 border border-slate-200 dark:border-transparent">Música</button>
-        <button class="bg-slate-100 dark:bg-[#1f293d] hover:bg-slate-200 dark:hover:bg-[#2d3a54] text-slate-800 dark:text-slate-200 text-xs font-bold px-4 py-2 rounded-full h-8 flex items-center justify-center shrink-0 transition-colors duration-300 border border-slate-200 dark:border-transparent">Podcasts</button>
-      </div>
+        <a href="login.html" 
+          class="flex items-center gap-2 bg-slate-100 dark:bg-[#1f293d] hover:bg-red-50 dark:hover:bg-red-950/30 text-slate-700 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 px-3 py-2 rounded-full text-xs font-bold transition-all duration-200 border border-slate-200 dark:border-transparent cursor-pointer group shrink-0 shadow-sm">
+          <i class="fa-solid fa-right-from-bracket transition-transform group-hover:translate-x-0.5"></i>
+          <span class="hidden sm:inline" onclick="cerrarSesion()">Cerrar sesión</span>
+        </a>
+      </header>
 
       <div>
         <h2 class="text-xl font-bold mb-4 text-slate-900 dark:text-white">Recomendado para ti</h2>
-        <div id="contenedor-canciones"class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          
-          <div class="music-card bg-slate-50 dark:bg-[#1a2333] p-4 rounded-md hover:bg-slate-100 dark:hover:bg-[#243147] transition-colors duration-200 group relative cursor-pointer border border-slate-200 dark:border-transparent" 
-               data-title="Novio No" data-artist="Sech, Ryan Castro">
-            <div class="relative mb-3 aspect-square w-full">
-              <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&q=80" class="rounded w-full h-full object-cover shadow-md" alt="Cover">
-              <button class="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-purple-600 dark:bg-[#8b5cf6] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200 shadow-lg">
-                <i class="fa-solid fa-play"></i>
-              </button>
-            </div>
-            <h3 class="text-sm font-bold truncate mb-1 text-slate-900 dark:text-white">Novio No</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 truncate">Sech, Ryan Castro</p>
-            
-            <div class="star-rating flex text-sm text-slate-300 dark:text-slate-600 gap-0.5">
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="1"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="2"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="3"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="4"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="5"></i>
-            </div>
-          </div>
-
-          <div class="music-card bg-slate-50 dark:bg-[#1a2333] p-4 rounded-md hover:bg-slate-100 dark:hover:bg-[#243147] transition-colors duration-200 group relative cursor-pointer border border-slate-200 dark:border-transparent" 
-               data-title="Blinding Lights" data-artist="The Weeknd">
-            <div class="relative mb-3 aspect-square w-full">
-              <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&q=80" class="rounded w-full h-full object-cover shadow-md" alt="Cover">
-              <button class="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-purple-600 dark:bg-[#8b5cf6] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200 shadow-lg">
-                <i class="fa-solid fa-play"></i>
-              </button>
-            </div>
-            <h3 class="text-sm font-bold truncate mb-1 text-slate-900 dark:text-white">Blinding Lights</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 truncate">The Weeknd</p>
-            
-            <div class="star-rating flex text-sm text-slate-300 dark:text-slate-600 gap-0.5">
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="1"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="2"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="3"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="4"></i>
-              <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" data-value="5"></i>
-            </div>
-          </div>
-
-        </div>
+        <div id="contenedor-canciones"class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
       </div>
     </main>
 
-    <aside class="hidden lg:flex flex-col w-72 bg-white dark:bg-[#121826] rounded-lg p-4 flex-shrink-0 overflow-y-auto transition-colors duration-300 shadow-sm border border-slate-200 dark:border-transparent">
-      <h3 class="font-bold text-sm text-slate-800 dark:text-white mb-4">Detalle en reproducción</h3>
-      <div class="relative rounded-lg overflow-hidden mb-4 shadow-xl aspect-[3/4] bg-slate-100 dark:bg-[#1a2333] transition-colors duration-300">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
-        <div class="absolute bottom-4 left-4 right-4 z-20">
-          <h2 id="detailTitle" class="text-white text-xl font-bold drop-shadow">Novio No</h2>
-          <p id="detailArtist" class="text-slate-300 text-xs drop-shadow">Sech, Ryan Castro</p>
+    <aside id="panel-derecho" class="hidden flex-col w-72 bg-white dark:bg-[#121826] rounded-lg p-4 flex-shrink-0 overflow-y-auto transition-colors duration-300 shadow-sm border border-slate-200 dark:border-transparent">
+  
+      <div class="flex items-center justify-between mb-4 shrink-0">
+        <h3 id="panelRightTitle" class="font-bold text-sm text-slate-800 dark:text-white">Detalle</h3>
+        <button id="closePanelRight" class="w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1f293d] transition-colors duration-200 cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+      
+      <div class="relative rounded-lg overflow-hidden mb-4 shadow-md aspect-[3/4] bg-slate-100 dark:bg-[#1a2333] transition-colors duration-300 flex-shrink-0">
+        <div id="detailImgContainer" class="absolute inset-0"></div>
+      </div>
+
+      <div class="flex flex-col gap-2 w-full">
+        <h2 id="detailTitle" class="text-lg font-bold text-slate-900 dark:text-white break-words leading-tight">Selecciona un elemento</h2>
+        <p id="detailArtist" class="text-slate-500 dark:text-slate-400 text-xs font-semibold"></p>
+        
+        <div id="extraArtistInfo" class="hidden border-t border-slate-200 dark:border-slate-800 pt-3 mt-1 space-y-2 text-xs text-slate-600 dark:text-slate-300 font-medium">
+          <div id="extraInfoText" class="flex flex-col gap-2"></div>
         </div>
       </div>
     </aside>
